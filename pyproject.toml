@@ -7,30 +7,30 @@ requires-python = ">=3.9"
 name = "cocotbext-mipi_csi2"
 description = "COCOTB VIP for mipi_csi2 protocol"
 package-dir = "src"
-classifiers = ["Development Status :: 4 - Beta",
- "Intended Audience :: Developers",
-"Programming Language :: Python :: 3.8",
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.8",
 ]
-version="2024.05.25"
+version = "2024.05.25"
 dependencies = ["cocotb"]
 authors = [{name = "Vijayvithal Jahagirdar", email = "jvs@dyumnin.com"}]
 maintainers = [{name = "Vijayvithal Jahagirdar", email = "jvs@dyumnin.com"}]
+
 [tool.pytest.ini_options]
 log_cli = true
 log_cli_level = "INFO"
 log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
 log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+
 [project.urls]
 Homepage = "https://dyumnin.com/cocotbext_mipi_csi2"
 Repository = "https://github.com/dyumnin/cocotbext_mipi_csi2.git"
 Issues = "https://github.com/dyumnin/cocotbext_mipi_csi2/issues"
 Documentation = "https://dyumnin.github.io/cocotbext_mipi_csi2"
+
 [tool.pdm]
 distribution = true
-
-[tool.pdm.version]
-source = "scm"
-version_format = "version:format_version"
 
 [tool.pdm.dev-dependencies]
 duty = ["duty>=0.10"]
