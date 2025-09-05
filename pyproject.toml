@@ -3,7 +3,6 @@ requires= ["pdm-backend"]
 build-backend = "pdm.backend"
 
 [project]
-dynamic = ["version"]
 requires-python = ">=3.9"
 name = "cocotbext-mipi_csi2"
 description = "COCOTB VIP for mipi_csi2 protocol"
