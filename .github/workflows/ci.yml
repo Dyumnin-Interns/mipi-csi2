@@ -36,7 +36,12 @@ jobs:
       - name: Install dependencies
         run: pdm install -G ci-quality
 
-      - name: Check docs (MkDocs)
+    
+      - name: Install MkDocs and plugins
+        run: |
+          pip install mkdocs mkdocs-material mkdocstrings mkdocstrings-python pymdown-extensions mkdocs-coverage mkdocs-minify-plugin mkdocs-git-committers-plugin-2 mkdocs-literate-nav markdown-exec
+
+      - name: Build documentation
         run: mkdocs build -vs
 
       - name: Check quality
@@ -50,7 +55,6 @@ jobs:
 
       - name: Check API
         run: pdm run duty check-api
-
 
   tests:
     strategy:
@@ -84,7 +88,6 @@ jobs:
         env:
           PYTHONPATH: src
 
-
   cocotb:
     runs-on: ubuntu-latest
     steps:
@@ -98,14 +101,14 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install cocotb
 
-      
       - name: Create results directory
-        run: mkdir -p test
+        run: mkdir -p tests
 
+    
       - name: Run cocotb test suite
         run: |
-          echo "Running cocotb tests..."
+          echo "Running cocotb simulation tests"
           cd test
-          pytest -v test_dut.py
+          python3 test.py
         env:
-          PYTHONPATH: src
+          PYTHONPATH: test
