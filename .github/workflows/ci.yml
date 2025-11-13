@@ -80,9 +80,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends iverilog gtkwave
           python3 -m pip install --upgrade pip
           python3 -m pip install cocotb
-      - name: Run cocotb smoke tests
-        run: |
-          make TESTCASE=test_dut.short_packet_ecc_test
-          make TESTCASE=test_dut.class_based_multi_packet_test
+      - name: Run cocotb test suite
+        run: make
         env:
-          PYTHONPATH: test # <-- This is the fix
+          PYTHONPATH: test
