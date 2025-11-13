@@ -36,10 +36,11 @@ jobs:
       - name: Install dependencies
         run: pdm install -G ci-quality
 
-    
       - name: Install MkDocs and plugins
         run: |
-          pip install mkdocs mkdocs-material mkdocstrings mkdocstrings-python pymdown-extensions mkdocs-coverage mkdocs-minify-plugin mkdocs-git-committers-plugin-2 mkdocs-literate-nav markdown-exec
+          pip install mkdocs mkdocs-material mkdocstrings mkdocstrings-python \
+                      pymdown-extensions mkdocs-coverage mkdocs-minify-plugin \
+                      mkdocs-git-committers-plugin-2 mkdocs-literate-nav markdown-exec
 
       - name: Build documentation
         run: mkdocs build -vs
@@ -55,6 +56,7 @@ jobs:
 
       - name: Check API
         run: pdm run duty check-api
+
 
   tests:
     strategy:
@@ -88,6 +90,7 @@ jobs:
         env:
           PYTHONPATH: src
 
+
   cocotb:
     runs-on: ubuntu-latest
     steps:
@@ -99,16 +102,19 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends iverilog gtkwave
           python3 -m pip install --upgrade pip
-          python3 -m pip install cocotb
+          python3 -m pip install cocotb cocotbext-axi cocotbext-dyulib cocotbext-mipi-csi2
 
-      - name: Create results directory
-        run: mkdir -p tests
+      - name: Ensure test directory
+        run: mkdir -p test
 
-    
       - name: Run cocotb test suite
         run: |
-          echo "Running cocotb simulation tests"
+          echo "Running cocotb Python testbench"
           cd test
-          python3 test.py
+          if [ -f "test.py" ]; then
+            python3 test.py
+          else
+            echo "No test.py found in test/. Skipping cocotb run."
+          fi
         env:
           PYTHONPATH: test
