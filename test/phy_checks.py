@@ -38,7 +38,7 @@ async def check_hs_entry_exit_timing(dut, min_settle=6, min_trail=2, min_exit=4)
     exit_cnt = 0
     while stable < 4 and exit_cnt < 64:
         await RisingEdge(dut.clk)
-              cur = int(dut.TxDDRClkHS.value)
+        cur = int(dut.TxDDRClkHS.value)
         if cur == lastc:
             stable += 1
         else:
