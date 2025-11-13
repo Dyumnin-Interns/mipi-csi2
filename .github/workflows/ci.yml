@@ -80,6 +80,8 @@ jobs:
           sudo apt-get install -y --no-install-recommends iverilog gtkwave
           python3 -m pip install --upgrade pip
           python3 -m pip install cocotb
+      - name: Create results directory
+        run: mkdir tests # <-- THIS IS THE NEW FIX
       - name: Run cocotb test suite
         run: make
         env:
