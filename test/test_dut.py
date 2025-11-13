@@ -3,8 +3,7 @@ import os
 import random
 from random import randint, choice
 from cocotb.clock import Clock
-from cocotb.triggers import RisingEdge, FallingEdge, Timer, with_timeout
-import cocotb.result
+from cocotb.triggers import RisingEdge, FallingEdge, Timer, with_timeout, SimTimeoutError
 from phy_checks import check_hs_entry_exit_timing, spot_check_serialization, ddr_low2bits
 from itertools import product
 # ---------------- Helpers / watchers ----------------
@@ -208,7 +207,7 @@ async def wait_ready(dut, cycles=READY_WAIT):
 async def tb_init(dut, lane_mode=2, start_mon=True):
     # Reset
     dut.resetn.value = 0
-    await Timer(100, units="ns")
+    await Timer(100, unit="ns")
     dut.resetn.value = 1
     await RisingEdge(dut.clk)
 
@@ -528,11 +527,11 @@ async def make_frame(drv, vc, width_bytes, lines, pixel_dt, num_lanes=2, rng=Non
 
 @cocotb.test()
 async def lane_skew_test(dut):
-    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
+    cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
 
     # Reset
     dut.resetn.value = 0
-    await Timer(100, units="ns")
+    await Timer(100, unit="ns")
     dut.resetn.value = 1
     await RisingEdge(dut.clk)
 
@@ -556,7 +555,7 @@ async def lane_skew_test(dut):
     _ = await drv.send_packet(0x2A, 0, payload, stall_cycles=set(), num_lanes=2, skew_l1_cycles=1)
 
     await drv.exit_hs()
-    await Timer(50, units="ns")
+    await Timer(50, unit="ns")
 
     # Treat this as a smoke (deskew is typically PHY/RX)
     if len(mon.packets) == 0:
@@ -569,11 +568,11 @@ async def lane_skew_test(dut):
 async def frame_sequence_test(dut):
     """Generate realistic frames with sync shorts and interleave VCs."""
     # Start clock
-    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
+    cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
 
     # Reset
     dut.resetn.value = 0
-    await Timer(100, units="ns")
+    await Timer(100, unit="ns")
     dut.resetn.value = 1
     await RisingEdge(dut.clk)
 
@@ -606,7 +605,7 @@ async def frame_sequence_test(dut):
 
     # Exit HS and allow monitor to drain
     await drv.exit_hs()
-    await Timer(100, units="ns")
+    await Timer(100, unit="ns")
 
     # Lightweight checks
     shorts = sum(1 for p in mon.packets if len(p) == 4)
@@ -617,7 +616,7 @@ async def frame_sequence_test(dut):
 
 @cocotb.test(timeout_time=800, timeout_unit="us")
 async def backpressure_midburst_test(dut):
-    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
+    cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
 
     # init/reset
     for s in ["lane0_byte","lane1_byte","lane0_valid","lane1_valid",
@@ -625,7 +624,7 @@ async def backpressure_midburst_test(dut):
         if hasattr(dut, s):
             getattr(dut, s).value = 0
     dut.resetn.value = 0
-    await Timer(100, units="ns")
+    await Timer(100, unit="ns")
     dut.resetn.value = 1
     await RisingEdge(dut.clk)
 
@@ -655,7 +654,7 @@ async def backpressure_midburst_test(dut):
     exp = await drv.send_packet(dt, vc, payload, stall_cycles, num_lanes=2)
 
     await drv.exit_hs()
-    await Timer(50, units="ns")
+    await Timer(50, unit="ns")
 
     assert len(mon.packets) == 1, f"Observed {len(mon.packets)} packets, expected 1"
     scb.compare_and_check(exp, mon.packets[0], dt, vc)
@@ -684,7 +683,7 @@ async def ddr_spotcheck_task(dut, lane_name="D0", samples=64):
         if len(obs) > 0 and all(v == 0 for v in obs):
             dut._log.warning(f"DDR samples all zero on {lane_name}: {obs}")
         return obs
-    except cocotb.result.SimTimeoutError:
+    except SimTimeoutError:
         dut._log.warning("txwrite_hs never rose during probe window; skipping DDR spot check")
         return []
 
@@ -693,11 +692,11 @@ async def ddr_spotcheck_task(dut, lane_name="D0", samples=64):
 async def short_packet_ecc_test(dut):
     """Send a small batch of short packets and check ECC + headers"""
     # Start clock
-    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
+    cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
 
     # Reset
     dut.resetn.value = 0
-    await Timer(100, units="ns")
+    await Timer(100, unit="ns")
     dut.resetn.value = 1
     await RisingEdge(dut.clk)
 
@@ -760,7 +759,7 @@ async def short_packet_ecc_test(dut):
 
     # Exit HS and allow monitor to drain
     await drv.exit_hs()
-    await Timer(50, units="ns")
+    await Timer(50, unit="ns")
 
     # Checks
     assert len(mon.packets) == num_pkts, f"Observed {len(mon.packets)} short packets, expected {num_pkts}"
@@ -773,7 +772,7 @@ async def short_packet_ecc_test(dut):
 
 @cocotb.test(timeout_time=1500, timeout_unit="us")
 async def dt_vc_matrix_test(dut):
-    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
+    cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
 
     drv, mon, scb = await tb_init(dut, lane_mode=2)
     await drv.enter_hs()
@@ -794,7 +793,7 @@ async def dt_vc_matrix_test(dut):
             coverage["dt_vc_pairs"][(dt, vc)] += 1
 
     await drv.exit_hs()
-    await Timer(50, units="ns")
+    await Timer(50, unit="ns")
 
     # Sanity: at least len(DT_LONG_SET)*4 packets have been observed
     exp_pkts = len(DT_LONG_SET) * 4
@@ -811,7 +810,7 @@ async def dt_vc_matrix_test(dut):
 
 @cocotb.test(timeout_time=2000, timeout_unit="us")
 async def random_stress_test(dut):
-    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
+    cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
     drv, mon, scb = await tb_init(dut, lane_mode=2)
     await drv.enter_hs()
     await wait_ready(dut)
@@ -859,14 +858,14 @@ async def random_stress_test(dut):
     coverage["gap_len"]["8-31"] += 1
 
     await drv.exit_hs()
-    await Timer(50, units="ns")
+    await Timer(50, unit="ns")
 
     assert len(mon.packets) >= pkts // 2, f"Observed {len(mon.packets)} of {pkts}"
 
 
 @cocotb.test(timeout_time=2000, timeout_unit="us")
 async def dual_vc_frame_sequences(dut):
-    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
+    cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
     drv, mon, scb = await tb_init(dut, lane_mode=2)
     await drv.enter_hs()
     await wait_ready(dut)
@@ -876,7 +875,7 @@ async def dual_vc_frame_sequences(dut):
     await make_frame(drv, vc=1, width_bytes=48, lines=FRAME_LINES, pixel_dt=0x2B, num_lanes=2, rng=_rng)
 
     await drv.exit_hs()
-    await Timer(100, units="ns")
+    await Timer(100, unit="ns")
 
     shorts = sum(1 for p in mon.packets if len(p) == 4)
     longs  = sum(1 for p in mon.packets if len(p) >= 6)
@@ -885,7 +884,7 @@ async def dual_vc_frame_sequences(dut):
 
 @cocotb.test(timeout_time=1200, timeout_unit="us")
 async def lane_mode_sweep_test(dut):
-    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
+    cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
     drv, mon, scb = await tb_init(dut, lane_mode=1)
     await drv.enter_hs()
     await wait_ready(dut)
@@ -906,13 +905,13 @@ async def lane_mode_sweep_test(dut):
     coverage["lane_mode"]["2"] += 1
 
     await drv.exit_hs()
-    await Timer(50, units="ns")
+    await Timer(50, unit="ns")
 
     assert len(mon.packets) >= 2
 
 @cocotb.test()
 async def short_sync_matrix_test(dut):
-    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
+    cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
     drv, mon, _ = await tb_init(dut, lane_mode=2)
     await drv.enter_hs(); await wait_ready(dut)
     for vc in range(4):
@@ -922,12 +921,12 @@ async def short_sync_matrix_test(dut):
             coverage["vc"][vc] += 1
             coverage["pkt_type"]["short"] += 1
             coverage["dt_vc_pairs"][(dt, vc)] += 1
-    await drv.exit_hs(); await Timer(50, "ns")
+    await drv.exit_hs(); await Timer(50, unit="ns")
 
 @cocotb.test(timeout_time=800, timeout_unit="us")
 async def golden_vectors_test(dut):
     """Verify ECC/CRC on fixed known headers/payloads."""
-    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
+    cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
     drv, mon, scb = await tb_init(dut, lane_mode=2)
     await drv.enter_hs()
     await wait_ready(dut)
@@ -952,7 +951,7 @@ async def golden_vectors_test(dut):
         dut._log.info(f"Golden check DT=0x{dt:02X} VC={vc} ECC=0x{ecc:02X} CRC=0x{crc:04X}")
 
     await drv.exit_hs()
-    await Timer(50, "ns")
+    await Timer(50, unit="ns")
 def flip_one_bit(byte_list, bit_index):
     idx = bit_index // 8
     bit = bit_index % 8
@@ -963,7 +962,7 @@ def flip_one_bit(byte_list, bit_index):
 async def negative_header_single_bit_correctable(dut):
     """Flip 1 bit in header and expect ECC correction in downstream RX (if modeled),
        or at least detection in scoreboard when comparing reconstructed header."""
-    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
+    cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
     drv, mon, scb = await tb_init(dut, lane_mode=2)
     await drv.enter_hs(); await wait_ready(dut)
 
@@ -1007,7 +1006,7 @@ async def negative_header_single_bit_correctable(dut):
     dut.lane0_valid.value = 0
     await RisingEdge(dut.clk)
 
-    await drv.exit_hs(); await Timer(50, "ns")
+    await drv.exit_hs(); await Timer(50, unit="ns")
 
     # If you have DUT flags, check them here (pseudo):
     # assert int(dut.header_ecc_corr.value) == 1
@@ -1018,7 +1017,7 @@ async def negative_header_single_bit_correctable(dut):
 @cocotb.test(timeout_time=800, timeout_unit="us")
 async def negative_crc_payload(dut):
     """Corrupt payload CRC and ensure mismatch can be observed (via DUT flag or scoreboard)."""
-    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
+    cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
     drv, mon, scb = await tb_init(dut, lane_mode=2)
     await drv.enter_hs(); await wait_ready(dut)
 
@@ -1054,7 +1053,7 @@ async def negative_crc_payload(dut):
     dut.lane0_valid.value = 0
     await RisingEdge(dut.clk)
 
-    await drv.exit_hs(); await Timer(50, "ns")
+    await drv.exit_hs(); await Timer(50, unit="ns")
 
     # If you have a DUT crc_err flag, assert it here
     # assert int(dut.crc_err.value) == 1
@@ -1065,7 +1064,7 @@ async def negative_crc_payload(dut):
 @cocotb.test(timeout_time=500, timeout_unit="us")
 async def class_based_multi_packet_test(dut):
     """Randomized long-packet tests with coverage updates and scoreboard checks"""
-    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
+    cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
     cocotb.start_soon(watch_txwrite(dut, duration=5000))
 
     # Reset/init
@@ -1074,7 +1073,7 @@ async def class_based_multi_packet_test(dut):
               "txrequest_hs", "txwrite_hs", "sop", "eop"]:
         if hasattr(dut, s):
             getattr(dut, s).value = 0
-    await Timer(100, units="ns")
+    await Timer(100, unit="ns")
     dut.resetn.value = 1
     await RisingEdge(dut.clk)
 
@@ -1136,7 +1135,7 @@ async def class_based_multi_packet_test(dut):
         dut._log.warning(f"DDR spot-check task error: {e}")
 
     await drv.exit_hs()
-    await Timer(50, units="ns")
+    await Timer(50, unit="ns")
 
     # Basic packet counts and content checks
     assert mon.sop_count == num_packets, f"SOP count {mon.sop_count} != {num_packets}"
@@ -1152,7 +1151,7 @@ async def class_based_multi_packet_test(dut):
     dut._log.info("Coverage summary:")
     for k in sorted(coverage.keys()):
         dut._log.info(f"{k}: {coverage[k]}")
-    await Timer(20, units="ns")
+    await Timer(20, unit="ns")
 
     uncovered = [k for k,v in coverage["dt_vc_pairs"].items() if v == 0]
     if uncovered:
