@@ -1,87 +1,88 @@
 name: ci
 
 on:
-push:
-pull_request:
-branches:
-- main
+  push:
+  pull_request:
+    branches:
+      - main
 
 defaults:
-run:
-shell: bash
+  run:
+    shell: bash
 
 env:
-LANG: en_US.utf-8
-LC_ALL: en_US.utf-8
-PYTHONIOENCODING: UTF-8
+  LANG: en_US.utf-8
+  LC_ALL: en_US.utf-8
+  PYTHONIOENCODING: UTF-8
 
 jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Fetch all tags
+        run: git fetch --depth=1 --tags --force
+      - name: Set up PDM
+        uses: pdm-project/setup-pdm@v4
+        with:
+          python-version: "3.10"
+      - name: Resolving dependencies
+        run: pdm lock -v --no-cross-platform -G ci-quality
+      - name: Install dependencies
+        run: pdm install -G ci-quality
+      - name: Check docs
+        run: pdm run duty check-docs
+      - name: Check quality
+        run: pdm run duty check-quality
+      - name: Check types
+        run: pdm run duty check-types
+      - name: Check dependencies
+        run: pdm run duty check-dependencies
+      - name: Check API
+        run: pdm run duty check-api
 
-quality:
-runs-on: ubuntu-latest
-steps:
-- name: Checkout
-uses: actions/checkout@v4
-- name: Fetch all tags
-run: git fetch --depth=1 --tags --force
-- name: Set up PDM
-uses: pdm-project/setup-pdm@v4
-with:
-python-version: "3.10"
-- name: Resolving dependencies
-run: pdm lock -v --no-cross-platform -G ci-quality
-- name: Install dependencies
-run: pdm install -G ci-quality
-- name: Check docs
-run: pdm run duty check-docs
-- name: Check quality
-run: pdm run duty check-quality
-- name: Check types
-run: pdm run duty check-types
-- name: Check dependencies
-run: pdm run duty check-dependencies
-- name: Check API
-run: pdm run duty check-api
+  tests:
+    strategy:
+      max-parallel: 4
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.10", "3.12"]
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.python-version == '3.12' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up PDM
+        uses: pdm-project/setup-pdm@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          allow-python-prereleases: true
+      - name: Resolving dependencies
+        run: pdm lock -v --no-cross-platform -G ci-tests
+      - name: Install dependencies
+        run: pdm install --no-editable -G ci-tests
+      - name: Install Icarus Verilog
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends iverilog
+      - name: Run Python test suite
+        run: pdm run duty test
+        env:
+          PYTHONPATH: src
 
-tests:
-strategy:
-max-parallel: 4
-matrix:
-os: [ubuntu-latest]
-python-version: ["3.10", "3.12"]
-runs-on: ${{ matrix.os }}
-continue-on-error: ${{ matrix.python-version == '3.12' }}
-steps:
-- name: Checkout
-uses: actions/checkout@v4
-- name: Set up PDM
-uses: pdm-project/setup-pdm@v4
-with:
-python-version: ${{ matrix.python-version }}
-allow-python-prereleases: true
-- name: Resolving dependencies
-run: pdm lock -v --no-cross-platform -G ci-tests
-- name: Install dependencies
-run: pdm install --no-editable -G ci-tests
-- name: Install Icarus Verilog
-run: sudo apt-get update && sudo apt-get install -y --no-install-recommends iverilog
-- name: Run Python test suite
-run: pdm run duty test
-env:
-PYTHONPATH: src
-
-cocotb:
-runs-on: ubuntu-latest
-steps:
-- name: Checkout
-uses: actions/checkout@v4
-- name: Install simulators and Python deps
-run: |
-sudo apt-get update
-sudo apt-get install -y --no-install-recommends iverilog gtkwave
-python3 -m pip install --upgrade pip
-python3 -m pip install cocotb
-- name: Run cocotb smoke tests
-run: |
-make TESTCASE=test_dut.short_packet_ecc_test
-make TESTCASE=test_dut.class_based_multi_packet_test
+  cocotb:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install simulators and Python deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends iverilog gtkwave
+          python3 -m pip install --upgrade pip
+          python3 -m pip install cocotb
+      - name: Run cocotb smoke tests
+        run: |
+          make TESTCASE=test_dut.short_packet_ecc_test
+          make TESTCASE=test_dut.class_based_multi_packet_test
+        env:
+          PYTHONPATH: test # <-- This is the fix
