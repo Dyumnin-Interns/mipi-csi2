@@ -4,7 +4,7 @@ site_url: "https://dyumnin.github.io/cocotbext_mipi_csi2"
 repo_url: "https://github.com/dyumnin/cocotbext_mipi_csi2"
 repo_name: "dyumnin/cocotbext_mipi_csi2"
 site_dir: "site"
-watch: [mkdocs.yml, README.md, CONTRIBUTING.md, CHANGELOG.md, src/cocotbext/mipi_csi2/, src/cocotbext/mipi_csi2/templates]
+watch: [mkdocs.yml, README.md, CONTRIBUTING.md, CHANGELOG.md, src/cocotbext/mipi_csi2/]
 copyright: Copyright &copy; 2024 Vijayvithal Jahagirdar
 edit_uri: edit/main/docs/
 
@@ -141,4 +141,4 @@ extra:
   - icon: fontawesome/brands/gitter
     link: https://gitter.im/cocotb/community
   - icon: fontawesome/brands/python
-    link: https://pypi.org/project/cocotbext_mipi_csi2/
+    link: https://pypi.org/project/cocotbext_mipi_csi2
