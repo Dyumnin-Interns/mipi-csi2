@@ -21,26 +21,36 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Fetch all tags
         run: git fetch --depth=1 --tags --force
+
       - name: Set up PDM
         uses: pdm-project/setup-pdm@v4
         with:
           python-version: "3.10"
+
       - name: Resolving dependencies
         run: pdm lock -v --no-cross-platform -G ci-quality
+
       - name: Install dependencies
         run: pdm install -G ci-quality
-      - name: Check docs
-        run: pdm run duty check-docs
+
+      - name: Check docs (MkDocs)
+        run: mkdocs build -vs
+
       - name: Check quality
         run: pdm run duty check-quality
+
       - name: Check types
         run: pdm run duty check-types
+
       - name: Check dependencies
         run: pdm run duty check-dependencies
+
       - name: Check API
         run: pdm run duty check-api
+
 
   tests:
     strategy:
@@ -53,36 +63,49 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up PDM
         uses: pdm-project/setup-pdm@v4
         with:
           python-version: ${{ matrix.python-version }}
           allow-python-prereleases: true
+
       - name: Resolving dependencies
         run: pdm lock -v --no-cross-platform -G ci-tests
+
       - name: Install dependencies
         run: pdm install --no-editable -G ci-tests
+
       - name: Install Icarus Verilog
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends iverilog
+
       - name: Run Python test suite
         run: pdm run duty test
         env:
           PYTHONPATH: src
+
 
   cocotb:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Install simulators and Python deps
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends iverilog gtkwave
           python3 -m pip install --upgrade pip
           python3 -m pip install cocotb
+
+      
       - name: Create results directory
-        run: mkdir tests # <-- THIS IS THE NEW FIX
+        run: mkdir -p test
+
       - name: Run cocotb test suite
-        run: make
+        run: |
+          echo "Running cocotb tests..."
+          cd test
+          pytest -v test_dut.py
         env:
-          PYTHONPATH: test
+          PYTHONPATH: src
