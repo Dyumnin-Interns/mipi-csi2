@@ -25,8 +25,10 @@ ignore = [
 "src//mipi_csi2.py" = ["T201"]
 "src//debug.py" = ["T201"]
 "scripts/*.py" = ["INP001","T201"]
-"test/test_dut.py" = ["RET505","BLE001"]
-"tests/test_dut.py" = ["RET505","BLE001"]
+
+Ignore only these rules in the DUT test file(s)
+"test/test_dut.py" = ["RET505","BLE001","S101","RUF001"]
+"tests/test_dut.py" = ["RET505","BLE001","S101","RUF001"]
 
 [flake8-quotes]
 docstring-quotes = "double"
@@ -43,4 +45,3 @@ convention = "google"
 [format]
 docstring-code-format = true
 docstring-code-line-length = 80
-
