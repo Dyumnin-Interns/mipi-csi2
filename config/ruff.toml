@@ -1,9 +1,11 @@
 target-version = "py38"
 line-length = 120
+
 exclude = [
 "fixtures",
 "site",
 ]
+
 select = [
 "A","ANN","ARG","B","BLE","C","C4","COM","D","DTZ","E","ERA","EXE","F","FBT","G",
 "I","ICN","INP","ISC","N","PGH","PIE","PL","PLC","PLE","PLR","PLW","PT","PYI","Q",
@@ -17,12 +19,12 @@ ignore = [
 "E722","S701","ARG001","I001","S603","E402","S607","PLC0206",
 ]
 
+[per-file-ignores]
 "src/cocotbext/mipi_csi2/testcases/.py" = ["S101","S311","FBT002","G002"]
 "src//cli.py" = ["T201","INP001"]
 "src//mipi_csi2.py" = ["T201"]
 "src//debug.py" = ["T201"]
 "scripts/*.py" = ["INP001","T201"]
-
 "test/test_dut.py" = ["RET505","BLE001"]
 "tests/test_dut.py" = ["RET505","BLE001"]
 
@@ -42,4 +44,3 @@ convention = "google"
 docstring-code-format = true
 docstring-code-line-length = 80
 
- ​
