@@ -29,7 +29,7 @@ else:
 # Use a local RNG for deterministic behavior
 _rng = random.Random(seed)
 random.seed(seed)  # keep global for compatibility
-cocotb.logging.info(f"Using random seed: {seed}")
+print(f"Using random seed: {seed}")
 # write seed to file for easy rerun
 try:
     with open("last_seed.txt", "w") as f:
