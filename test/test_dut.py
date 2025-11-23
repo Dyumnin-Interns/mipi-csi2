@@ -15,10 +15,10 @@ async def watch_txwrite(dut, duration=20000):
         await RisingEdge(dut.clk)
         cur = int(dut.txwrite_hs.value)
         if cur != prev:
-            dut._log.info(f"txwrite_hs toggled to {cur} at {cocotb.utils.get_sim_time('ns')} ns")
+            dut._logging.info(f"txwrite_hs toggled to {cur} at {cocotb.utils.get_sim_time('ns')} ns")
             count += 1
             prev = cur
-    dut._log.info(f"txwrite_hs toggled {count} times in watch window")
+    dut._logging.info(f"txwrite_hs toggled {count} times in watch window")
 
 # ---------------- Random Seed ----------------
 seed_env = os.getenv("SEED", "")
@@ -29,7 +29,7 @@ else:
 # Use a local RNG for deterministic behavior
 _rng = random.Random(seed)
 random.seed(seed)  # keep global for compatibility
-cocotb.log.info(f"Using random seed: {seed}")
+cocotb.logging.info(f"Using random seed: {seed}")
 # write seed to file for easy rerun
 try:
     with open("last_seed.txt", "w") as f:
@@ -430,20 +430,20 @@ class Csi2Monitor:
                         self._cur.append(lane1_b)
                     else:
                         if hasattr(self.dut, "lane1_valid") and not lane1_v:
-                            self.dut._log.debug("Lane1 not valid on a 2-lane expected cycle")
+                            self.dut._logging.debug("Lane1 not valid on a 2-lane expected cycle")
                 else:
                     if hasattr(self.dut, "lane1_valid") and lane1_v:
-                        self.dut._log.error("lane1_valid asserted in 1-lane mode!")
+                        self.dut._logging.error("lane1_valid asserted in 1-lane mode!")
 
             if do_write and eop and self._collecting:
                 self.eop_count += 1
                 # short-packet length sanity
                 if len(self._cur) == 4:
-                    self.dut._log.debug(f"Monitor collected short packet: {self._cur}")
+                    self.dut._logging.debug(f"Monitor collected short packet: {self._cur}")
                 elif len(self._cur) < 4:
-                    self.dut._log.error(f"Short packet too short: {self._cur}")
+                    self.dut._logging.error(f"Short packet too short: {self._cur}")
                 elif len(self._cur) > 4 and len(self._cur) < 6:
-                    self.dut._log.error(f"Short packet too long (possible CRC leak): {self._cur}")
+                    self.dut._logging.error(f"Short packet too long (possible CRC leak): {self._cur}")
                 self.packets.append(self._cur)
                 self._collecting = False
                 self._cur = []
@@ -559,9 +559,9 @@ async def lane_skew_test(dut):
 
     # Treat this as a smoke (deskew is typically PHY/RX)
     if len(mon.packets) == 0:
-        dut._log.warning("lane_skew_test: no packets observed; treating as informational")
+        dut._logging.warning("lane_skew_test: no packets observed; treating as informational")
     else:
-        dut._log.info(f"lane_skew_test observed {len(mon.packets)} packet(s)")
+        dut._logging.info(f"lane_skew_test observed {len(mon.packets)} packet(s)")
 
 
 @cocotb.test(timeout_time=1500, timeout_unit="us")
@@ -610,7 +610,7 @@ async def frame_sequence_test(dut):
     # Lightweight checks
     shorts = sum(1 for p in mon.packets if len(p) == 4)
     longs  = sum(1 for p in mon.packets if len(p) >= 6)
-    dut._log.info(f"frame_sequence_test: shorts={shorts}, longs={longs}")
+    dut._logging.info(f"frame_sequence_test: shorts={shorts}, longs={longs}")
 
 
 
@@ -668,23 +668,23 @@ async def ddr_spotcheck_task(dut, lane_name="D0", samples=64):
     Arm to catch first txwrite_hs rising edge and then sample DDR.
     Returns collected samples (background task returns a task result if awaited).
     """
-    dut._log.info("DDR spot-check armed and waiting for txwrite_hs rising edge")
+    dut._logging.info("DDR spot-check armed and waiting for txwrite_hs rising edge")
     try:
         # If already high, we will proceed immediately (don't wait for next rising)
         if int(dut.txwrite_hs.value):
-            dut._log.info("txwrite_hs already high when arming; proceeding")
+            dut._logging.info("txwrite_hs already high when arming; proceeding")
         else:
             await with_timeout(RisingEdge(dut.txwrite_hs), 200_000, 'ns')
-            dut._log.info("txwrite_hs rose — starting DDR spot check now")
+            dut._logging.info("txwrite_hs rose — starting DDR spot check now")
         # Now sample DDR serialization
         obs = await spot_check_serialization(dut, lane_name=lane_name, samples=samples)
-        dut._log.info(f"spot_check_serialization: lane={lane_name}, collected={len(obs)} samples")
+        dut._logging.info(f"spot_check_serialization: lane={lane_name}, collected={len(obs)} samples")
         # simple sanity: ensure samples are not all zero
         if len(obs) > 0 and all(v == 0 for v in obs):
-            dut._log.warning(f"DDR samples all zero on {lane_name}: {obs}")
+            dut._logging.warning(f"DDR samples all zero on {lane_name}: {obs}")
         return obs
     except SimTimeoutError:
-        dut._log.warning("txwrite_hs never rose during probe window; skipping DDR spot check")
+        dut._logging.warning("txwrite_hs never rose during probe window; skipping DDR spot check")
         return []
 
 # ---------------- TESTS ----------------
@@ -755,7 +755,7 @@ async def short_packet_ecc_test(dut):
     try:
         _ = await ddr_task
     except Exception as e:
-        dut._log.warning(f"DDR spot-check error: {e}")
+        dut._logging.warning(f"DDR spot-check error: {e}")
 
     # Exit HS and allow monitor to drain
     await drv.exit_hs()
@@ -768,7 +768,7 @@ async def short_packet_ecc_test(dut):
         dt, vc, sd = meta[i]
         scb.check_short_header(dt, vc, sd, mon.packets[i])
 
-    dut._log.info(f"Coverage after short test: {coverage}")
+    dut._logging.info(f"Coverage after short test: {coverage}")
 
 @cocotb.test(timeout_time=1500, timeout_unit="us")
 async def dt_vc_matrix_test(dut):
@@ -948,7 +948,7 @@ async def golden_vectors_test(dut):
         # Validate header fields and CRC via scoreboard
         scb.compare_and_check(exp, exp, dt, vc)
 
-        dut._log.info(f"Golden check DT=0x{dt:02X} VC={vc} ECC=0x{ecc:02X} CRC=0x{crc:04X}")
+        dut._logging.info(f"Golden check DT=0x{dt:02X} VC={vc} ECC=0x{ecc:02X} CRC=0x{crc:04X}")
 
     await drv.exit_hs()
     await Timer(50, unit="ns")
@@ -1120,7 +1120,7 @@ async def class_based_multi_packet_test(dut):
 
         # Arm DDR spot-check once before the first packet so we don't miss pulses
         if i == 0:
-            dut._log.info("Arming DDR lane spot check before first packet")
+            dut._logging.info("Arming DDR lane spot check before first packet")
             ddr_task = cocotb.start_soon(ddr_spotcheck_task(dut, lane_name="D0", samples=128))
 
         exp = await drv.send_packet(datatype, vc, payload, stall_cycles, num_lanes=num_lanes)
@@ -1132,7 +1132,7 @@ async def class_based_multi_packet_test(dut):
         if 'ddr_task' in locals():
             obs = await ddr_task
     except Exception as e:
-        dut._log.warning(f"DDR spot-check task error: {e}")
+        dut._logging.warning(f"DDR spot-check task error: {e}")
 
     await drv.exit_hs()
     await Timer(50, unit="ns")
@@ -1146,34 +1146,34 @@ async def class_based_multi_packet_test(dut):
         datatype, vc, payload_len = meta[i]
         scb.compare_and_check(expected_packets[i], mon.packets[i], datatype, vc)
 
-    dut._log.info(f"Scoreboard: {scb.matches}/{scb.total} packets matched with header/CRC checks")
+    dut._logging.info(f"Scoreboard: {scb.matches}/{scb.total} packets matched with header/CRC checks")
     # Print coverage summary sorted
-    dut._log.info("Coverage summary:")
+    dut._logging.info("Coverage summary:")
     for k in sorted(coverage.keys()):
-        dut._log.info(f"{k}: {coverage[k]}")
+        dut._logging.info(f"{k}: {coverage[k]}")
     await Timer(20, unit="ns")
 
     uncovered = [k for k,v in coverage["dt_vc_pairs"].items() if v == 0]
     if uncovered:
-        dut._log.warning(f"Uncovered DT×VC pairs: {uncovered}")
+        dut._logging.warning(f"Uncovered DT×VC pairs: {uncovered}")
     for m,cnt in coverage["lane_mode"].items():
         if cnt == 0:
-            dut._log.warning(f"Lane mode {m} not exercised")
+            dut._logging.warning(f"Lane mode {m} not exercised")
 
 @cocotb.test(timeout_time=10, timeout_unit="us")
 async def coverage_report_test(dut):
     # Report uncovered DT×VC pairs
     uncovered = [k for k, v in coverage["dt_vc_pairs"].items() if v == 0]
     if uncovered:
-        dut._log.warning(f"Uncovered DT×VC pairs: {uncovered}")
+        dut._logging.warning(f"Uncovered DT×VC pairs: {uncovered}")
 
     # Lane modes not seen
     for m, cnt in coverage["lane_mode"].items():
         if cnt == 0:
-            dut._log.warning(f"Lane mode {m} not exercised")
+            dut._logging.warning(f"Lane mode {m} not exercised")
 
     # Gaps
-    dut._log.info(f"gap_len: {coverage.get('gap_len', {})}")
+    dut._logging.info(f"gap_len: {coverage.get('gap_len', {})}")
 
     def pct(n, d):
         return 0.0 if d == 0 else 100.0 * float(n) / float(d)
@@ -1181,13 +1181,13 @@ async def coverage_report_test(dut):
     # DT×VC pairs coverage
     total_pairs = len(coverage["dt_vc_pairs"])
     hit_pairs = sum(1 for v in coverage["dt_vc_pairs"].values() if v > 0)
-    dut._log.info(f"DT×VC pair coverage: {hit_pairs}/{total_pairs} = {pct(hit_pairs, total_pairs):.1f}%")
+    dut._logging.info(f"DT×VC pair coverage: {hit_pairs}/{total_pairs} = {pct(hit_pairs, total_pairs):.1f}%")
 
     # Category-wise simple coverage (bins hit vs total bins)
     def dict_coverage(name, dct):
         total = len(dct)
         hit = sum(1 for v in dct.values() if v > 0)
-        dut._log.info(f"{name} bins: {hit}/{total} = {pct(hit, total):.1f}%")
+        dut._logging.info(f"{name} bins: {hit}/{total} = {pct(hit, total):.1f}%")
 
     dict_coverage("dt_long", coverage["dt_long"])
     dict_coverage("dt_short", coverage["dt_short"])
@@ -1205,7 +1205,7 @@ async def coverage_report_test(dut):
         dct = coverage.get(k, {})
         den += len(dct)
         num += sum(1 for v in dct.values() if v > 0)
-    dut._log.info(f"Overall simple-bin coverage: {num}/{den} = {pct(num, den):.1f}%")
+    dut._logging.info(f"Overall simple-bin coverage: {num}/{den} = {pct(num, den):.1f}%")
 
     # Persist coverage as JSON artifact (stringify tuple keys)
     try:
@@ -1222,6 +1222,6 @@ async def coverage_report_test(dut):
         cov_out = stringify_keys(coverage)
         with open("coverage.json", "w") as f:
             json.dump(cov_out, f, indent=2)
-        dut._log.info("Coverage written to coverage.json")
+        dut._logging.info("Coverage written to coverage.json")
     except Exception as e:
-        dut._log.warning(f"Coverage dump failed: {e}")
+        dut._logging.warning(f"Coverage dump failed: {e}")
