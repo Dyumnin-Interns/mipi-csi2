@@ -4,6 +4,7 @@ import random
 from random import randint, choice
 from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge, FallingEdge, Timer, with_timeout
+from cocotb.result import SimTimeoutError
 from phy_checks import check_hs_entry_exit_timing, spot_check_serialization, ddr_low2bits
 from itertools import product
 # ---------------- Helpers / watchers ----------------
