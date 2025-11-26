@@ -93,9 +93,12 @@ for dt in DT_LONG_SET:
 coverage["gap_len"] = {"0": 0, "1": 0, "2-7": 0, "8-31": 0}
 
 def bin_gap_len(n):
-    if n == 0: return "0"
-    if n == 1: return "1"
-    if 2 <= n <= 7: return "2-7"
+    if n == 0: 
+        return "0"
+    if n == 1:
+         return "1"
+    if 2 <= n <= 7: 
+        return "2-7"
     return "8-31"
 def pick_dt_vc_biased():
     # Prefer uncovered pairs 70% of the time
@@ -219,7 +222,8 @@ async def tb_init(dut, lane_mode=2, start_mon=True):
 
     # Create components
     drv = Csi2Driver(dut)
-    mon = Csi2Monitor(dut); mon.expected_num_lanes = lane_mode
+    mon = Csi2Monitor(dut); 
+    mon.expected_num_lanes = lane_mode
     scb = Csi2Scoreboard()
 
     # Start monitor
@@ -629,7 +633,8 @@ async def backpressure_midburst_test(dut):
     await RisingEdge(dut.clk)
 
     drv = Csi2Driver(dut)
-    mon = Csi2Monitor(dut); mon.expected_num_lanes = 2
+    mon = Csi2Monitor(dut); 
+    mon.expected_num_lanes = 2
     scb = Csi2Scoreboard()
     cocotb.start_soon(mon.start())
 
@@ -708,7 +713,8 @@ async def short_packet_ecc_test(dut):
 
     # Create driver/monitor/scoreboard once
     drv = Csi2Driver(dut)
-    mon = Csi2Monitor(dut); mon.expected_num_lanes = 2
+    mon = Csi2Monitor(dut); 
+    mon.expected_num_lanes = 2
     scb = Csi2Scoreboard()
 
     # Start monitor before traffic
