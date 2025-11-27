@@ -94,7 +94,6 @@ markdown_extensions:
 
 plugins:
 - search
-- markdown-exec
 - gen-files:
     scripts:
     - scripts/gen_ref_nav.py
