@@ -1,6 +1,9 @@
 import cocotb
 import os
 import random
+import pytest
+from cocotb_test.simulator import run
+import glob
 from random import randint
 from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge, Timer, with_timeout
@@ -1233,3 +1236,40 @@ async def coverage_report_test(dut):
         dut._log.info("Coverage written to coverage.json")
     except Exception as e:
         dut._log.warning(f"Coverage dump failed: {e}")
+# ==============================================================================
+# Runner for Pytest
+# ==============================================================================
+@pytest.mark.parametrize("testcase", [
+    "lane_skew_test",
+    "frame_sequence_test",
+    "backpressure_midburst_test",
+    "short_packet_ecc_test",
+    "dt_vc_matrix_test",
+    "random_stress_test",
+    "golden_vectors_test"
+])
+def test_mipi_csi2_runner(testcase):
+    """
+    This function bridges Pytest and Cocotb. 
+    It compiles the Verilog and starts the simulation for each testcase.
+    """
+    
+    # 1. DEFINE YOUR RTL SOURCES HERE
+    # If your RTL is in a folder named 'hdl' or 'rtl', point to it.
+    # Example: sources = glob.glob("hdl/*.v")
+    # For now, I am using a wildcard. YOU MUST UPDATE THIS PATH.
+    sources = glob.glob("src//.v", recursive=True) + glob.glob("hdl//.v", recursive=True)
+
+    # If no sources found, we can't simulate, but we let pytest pass 
+    # so you don't get 'Exit Code 5' (No tests collected).
+    if not sources:
+        pytest.skip("No Verilog/SystemVerilog sources found. Please update 'sources' variable in test_mipi_csi2_runner.")
+
+    run(
+        verilog_sources=sources,
+        toplevel="mipi_csi2_top", # <--- UPDATE THIS to your top-level Verilog module name
+        module="test_dut",        # This refers to this python file (test_dut.py)
+        testcase=testcase,        # Run the specific testcase
+        sim_build=f"sim_build/{testcase}",
+        waves=True                # Enable waveform dumping
+    )
