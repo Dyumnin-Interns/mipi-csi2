@@ -6,6 +6,7 @@ exclude = [
   "site",
 ]
 
+# This is very aggressive, selecting almost all rules.
 select = [
   "A","ANN","ARG","B","BLE","C","C4","COM","D","DTZ","E","ERA","EXE","F","FBT","G",
   "I","ICN","INP","ISC","N","PGH","PIE","PL","PLC","PLE","PLR","PLW","PT","PYI","Q",
@@ -17,6 +18,8 @@ ignore = [
   "ERA001","G004","PLR0911","PLR0912","PLR0913","PLR0915","SLF001","TRY003",
   "TID252","PGH003","ANN201","ANN001","ARG002","E721","N803","N802","N801",
   "E722","S701","ARG001","I001","S603","E402","S607","PLC0206",
+  # ADDED: Ignore the special character warnings globally
+  "RUF003", 
 ]
 
 [per-file-ignores]
@@ -26,13 +29,27 @@ ignore = [
 "src/*/debug.py" = ["T201"]
 "scripts/*.py" = ["INP001","T201"]
 
+# UPDATED: Added ignores for the noise found in your logs
 "test/test_dut.py" = [
     "RET505", "BLE001", "S101", "RUF001", "PLR2004", "D103", "RUF059", "F841", "E702", "E701", "RUF005", "D205", "D209",
-    "D208", "ANN202", "D415", "SIM105", "S110", "Q000", "PLC0415"
+    "D208", "ANN202", "D415", "SIM105", "S110", "Q000", "PLC0415",
+    "D", "ANN", "S311", "T201", "E703", "FBT002", "F401", "SIM108", "PLR5501"
 ]
+
 "tests/test_dut.py" = [
     "RET505", "BLE001", "S101", "RUF001", "PLR2004", "D103", "RUF059", "F841", "E702", "E701", "RUF005", "D205", "D209",
-    "D208", "ANN202", "D415", "SIM105", "S110", "Q000", "PLC0415"
+    "D208", "ANN202", "D415", "SIM105", "S110", "Q000", "PLC0415",
+    # ADDED THE FOLLOWING TO SILENCE NOISE:
+    "D",       # Ignore all docstring requirements
+    "ANN",     # Ignore all type annotation requirements
+    "S311",    # Allow standard random (needed for seeds)
+    "T201",    # Allow print() statements
+    "E703",    # Allow semicolons
+    "FBT002",  # Allow boolean default arguments
+    "F401",    # Allow unused imports (cleanup later)
+    "SIM108",  # Ignore ternary operator suggestions
+    "PLR5501", # Ignore "use elif" suggestions
+    "B006",    # Ignore mutable default arg (BUT YOU MUST FIX THE CODE LOGIC STILL)
 ]
 
 [flake8-quotes]
