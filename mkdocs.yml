@@ -94,6 +94,7 @@ markdown_extensions:
 
 plugins:
 - search
+# - markdown-exec (Removed: caused crash)
 - gen-files:
     scripts:
     - scripts/gen_ref_nav.py
@@ -122,15 +123,9 @@ plugins:
           show_symbol_type_toc: true
           signature_crossrefs: true
           summary: true
-- git-committers:
-    enabled: !ENV [DEPLOY, false]
-    repository: dyumnin/cocotbext_mipi_csi2
-- minify:
-    minify_html: !ENV [DEPLOY, false]
-- group:
-    enabled: !ENV [MATERIAL_INSIDERS, false]
-    plugins:
-    - typeset
+# - git-committers (Removed: caused crash)
+# - minify (Removed: likely to crash)
+# - group (Removed: likely to crash)
 
 extra:
   social:
