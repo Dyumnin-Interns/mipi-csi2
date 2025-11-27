@@ -1,0 +1,30 @@
+> Checking code qualityTraceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\Mithali\mipi-csi2\.venv\Scripts\duty.EXE\__main__.py", line 7, in <module>
+  File "C:\Users\Mithali\mipi-csi2\.venv\Lib\site-packages\duty\_internal\cli.py", line 318, in main
+    duty.run(*posargs, **kwargs)
+  File "C:\Users\Mithali\mipi-csi2\.venv\Lib\site-packages\duty\_internal\collection.py", line 86, in run
+    self(self.context, *args, **kwargs)
+  File "C:\Users\Mithali\mipi-csi2\.venv\Lib\site-packages\duty\_internal\collection.py", line 120, in __call__
+    self.function(context, *args, **kwargs)
+  File "C:\Users\Mithali\mipi-csi2\duties.py", line 78, in check_quality
+    ctx.run(
+  File "C:\Users\Mithali\mipi-csi2\.venv\Lib\site-packages\duty\_internal\context.py", line 85, in run
+    result = failprint_run(cmd, **final_options)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mithali\mipi-csi2\.venv\Lib\site-packages\failprint\_internal\runners.py", line 129, in run
+    print(unescape(parse(rendered)))  # noqa: T201
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Mithali\mipi-csi2\.venv\Lib\site-packages\colorama\ansitowin32.py", line 47, in write
+    self.__convertor.write(text)
+  File "C:\Users\Mithali\mipi-csi2\.venv\Lib\site-packages\colorama\ansitowin32.py", line 177, in write
+    self.write_and_convert(text)
+  File "C:\Users\Mithali\mipi-csi2\.venv\Lib\site-packages\colorama\ansitowin32.py", line 202, in write_and_convert
+    self.write_plain_text(text, cursor, start)
+  File "C:\Users\Mithali\mipi-csi2\.venv\Lib\site-packages\colorama\ansitowin32.py", line 210, in write_plain_text
+    self.wrapped.write(text[start:end])
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2717' in position 0: character maps to <undefined>

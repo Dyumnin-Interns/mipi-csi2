@@ -1,4 +1,3 @@
-import cocotb
 from cocotb.triggers import RisingEdge
 
 async def check_hs_entry_exit_timing(dut, min_settle=6, min_trail=2, min_exit=4):

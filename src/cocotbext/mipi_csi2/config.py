@@ -1,4 +1,3 @@
-import cocotb
 
 
 class Mipi_csi2Config:
