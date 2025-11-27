@@ -11,7 +11,7 @@ edit_uri: edit/main/docs/
 validation:
   omitted_files: warn
   absolute_links: warn
-  unrecognized_links: warn
+  unrecognized_links: ignore
 
 nav:
 - Home:
