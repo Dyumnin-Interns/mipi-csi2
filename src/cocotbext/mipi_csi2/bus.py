@@ -1,5 +1,4 @@
 """Bus creator."""
-import cocotb
 from cocotb_bus import Bus
 
 
