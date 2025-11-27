@@ -15,11 +15,10 @@ _signals = [
     "txready_hs",
     "TxDDRClkHS",
     "D0",
-    "D1",
+    "D1"
 ]
 
 class Mipi_csi2Bus(Bus):
-    """..."""
     def __init__(self, dut, prefix,
                  bus_separator="_", case_insensitive=False,
                  array_idx=None):
