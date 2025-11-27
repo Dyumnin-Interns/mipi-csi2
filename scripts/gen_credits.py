@@ -110,7 +110,7 @@ def _render_credits() -> str:
         These projects were used to build *{{ project_name }}*. **Thank you!**
 
         [`python`](https://www.python.org/) |
-        [`pdm`](https://pdm.fming.dev/) |
+        [pdm](https://pdm.fming.dev/) |
         [`copier-pdm`](https://github.com/pawamoy/copier-pdm)
 
         {% macro dep_line(dep) -%}
