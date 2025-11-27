@@ -1,0 +1,50 @@
+target-version = "py38"
+line-length = 120
+
+exclude = [
+  "fixtures",
+  "site",
+]
+
+select = [
+  "A","ANN","ARG","B","BLE","C","C4","COM","D","DTZ","E","ERA","EXE","F","FBT","G",
+  "I","ICN","INP","ISC","N","PGH","PIE","PL","PLC","PLE","PLR","PLW","PT","PYI","Q",
+  "RUF","RSE","RET","S","SIM","SLF","T","T10","T20","TCH","TID","TRY","UP","W","YTT",
+]
+
+ignore = [
+  "A001","ANN101","ANN102","ANN204","ANN401","ARG005","C901","D105","D417","E501",
+  "ERA001","G004","PLR0911","PLR0912","PLR0913","PLR0915","SLF001","TRY003",
+  "TID252","PGH003","ANN201","ANN001","ARG002","E721","N803","N802","N801",
+  "E722","S701","ARG001","I001","S603","E402","S607","PLC0206",
+  "RUF003", 
+]
+
+[per-file-ignores]
+"src/cocotbext/mipi_csi2/testcases/*.py" = ["S101","S311","FBT002","G002"]
+"src/*/cli.py" = ["T201","INP001"]
+"src/*/mipi_csi2.py" = ["T201"]
+"src/*/debug.py" = ["T201"]
+"scripts/*.py" = ["INP001","T201"]
+
+"tests/test_dut.py" = [
+    "RET505", "BLE001", "S101", "RUF001", "PLR2004", "D103", "RUF059", "F841", "E702", "E701", "RUF005", "D205", "D209",
+    "D208", "ANN202", "D415", "SIM105", "S110", "Q000", "PLC0415",
+    "D", "ANN", "S311", "T201", "E703", "FBT002", "F401", "SIM108", "PLR5501", "B006"
+]
+
+[flake8-quotes]
+docstring-quotes = "double"
+
+[flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[isort]
+known-first-party = ["cocotbext_dyulib"]
+
+[pydocstyle]
+convention = "google"
+
+[format]
+docstring-code-format = true
+docstring-code-line-length = 80

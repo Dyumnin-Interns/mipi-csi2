@@ -1,10 +1,10 @@
 import cocotb
 import os
 import random
-from random import randint, choice
+from random import randint
 from cocotb.clock import Clock
-from cocotb.triggers import RisingEdge, FallingEdge, Timer, with_timeout, SimTimeoutError
-from phy_checks import check_hs_entry_exit_timing, spot_check_serialization, ddr_low2bits
+from cocotb.triggers import RisingEdge, Timer, with_timeout, SimTimeoutError
+from phy_checks import check_hs_entry_exit_timing, spot_check_serialization
 from itertools import product
 # ---------------- Helpers / watchers ----------------
 async def watch_txwrite(dut, duration=20000):
