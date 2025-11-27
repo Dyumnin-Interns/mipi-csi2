@@ -73,7 +73,6 @@ extra_css:
 markdown_extensions:
 - attr_list
 - admonition
-- callouts
 - footnotes
 - pymdownx.emoji:
     emoji_index: !!python/name:material.extensions.emoji.twemoji
