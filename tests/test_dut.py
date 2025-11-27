@@ -1,9 +1,9 @@
 import cocotb
 import os
 import random
-from random import randint, choice
+from random import randint
 from cocotb.clock import Clock
-from cocotb.triggers import RisingEdge, FallingEdge, Timer, with_timeout, SimTimeoutError
+from cocotb.triggers import RisingEdge, Timer, with_timeout, SimTimeoutError
 from phy_checks import check_hs_entry_exit_timing, spot_check_serialization, ddr_low2bits
 from itertools import product
 # ---------------- Helpers / watchers ----------------
@@ -57,7 +57,7 @@ for dt in [0x2A, 0x2B, 0x2C]:
 def bin_payload_len(n):
     if n == 0:
         return "0"
-    if n == 1:
+    if n == 1
         return "1"
     if 2 <= n <= 7:
         return "2-7"
@@ -222,7 +222,7 @@ async def tb_init(dut, lane_mode=2, start_mon=True):
 
     # Create components
     drv = Csi2Driver(dut)
-    mon = Csi2Monitor(dut); 
+    mon = Csi2Monitor(dut)
     mon.expected_num_lanes = lane_mode
     scb = Csi2Scoreboard()
 
@@ -263,7 +263,7 @@ class Csi2Driver:
 
         # Lane distribute
         lanes = lane_distribute(expected_bytes, num_lanes)
-        max_len = max(len(l) for l in lanes)
+        max_len = max(len(lane) for l in lanes)
 
         idx = 0
         cycle = 0
@@ -329,7 +329,7 @@ class Csi2Driver:
     async def send_short_packet(self, datatype, vc, short_data, stall_cycles, num_lanes=2):
         pkt = build_short_packet(datatype, vc, short_data)
         lanes = lane_distribute(pkt, num_lanes)
-        max_len = max(len(l) for l in lanes)
+        max_len = max(len(lane) for l in lanes)
 
         idx = 0
         cycle = 0
@@ -548,7 +548,7 @@ async def lane_skew_test(dut):
     drv = Csi2Driver(dut)
     mon = Csi2Monitor(dut)
     mon.expected_num_lanes = 2
-    scb = Csi2Scoreboard()
+    scb= Csi2Scoreboard()
 
     cocotb.start_soon(mon.start())
 
@@ -556,7 +556,7 @@ async def lane_skew_test(dut):
 
     # Send one packet with lane1 skew
     payload = [0xAA, 0x55]*32
-    _ = await drv.send_packet(0x2A, 0, payload, stall_cycles=set(), num_lanes=2, skew_l1_cycles=1)
+    await drv.send_packet(0x2A, 0, payload, stall_cycles=set(), num_lanes=2, skew_l1_cycles=1)
 
     await drv.exit_hs()
     await Timer(50, unit="ns")
@@ -588,7 +588,8 @@ async def frame_sequence_test(dut):
 
     # Create driver/monitor/scoreboard once
     drv = Csi2Driver(dut)
-    mon = Csi2Monitor(dut); mon.expected_num_lanes = 2
+    mon = Csi2Monitor(dut)
+    mon.expected_num_lanes = 2
     scb = Csi2Scoreboard()
 
     # Start monitor before entering HS / sending anything
@@ -633,9 +634,9 @@ async def backpressure_midburst_test(dut):
     await RisingEdge(dut.clk)
 
     drv = Csi2Driver(dut)
-    mon = Csi2Monitor(dut); 
+    mon = Csi2Monitor(dut)
     mon.expected_num_lanes = 2
-    scb = Csi2Scoreboard()
+    scb= Csi2Scoreboard()
     cocotb.start_soon(mon.start())
 
     await drv.enter_hs()
@@ -663,9 +664,6 @@ async def backpressure_midburst_test(dut):
 
     assert len(mon.packets) == 1, f"Observed {len(mon.packets)} packets, expected 1"
     scb.compare_and_check(exp, mon.packets[0], dt, vc)
-
-
-
 
 # ---------------- DDR spot-check helper ----------------
 async def ddr_spotcheck_task(dut, lane_name="D0", samples=64):
@@ -713,7 +711,7 @@ async def short_packet_ecc_test(dut):
 
     # Create driver/monitor/scoreboard once
     drv = Csi2Driver(dut)
-    mon = Csi2Monitor(dut); 
+    mon = Csi2Monitor(dut)
     mon.expected_num_lanes = 2
     scb = Csi2Scoreboard()
 
@@ -759,7 +757,7 @@ async def short_packet_ecc_test(dut):
 
     # Wait for DDR task result (non-blocking if already done)
     try:
-        _ = await ddr_task
+         await ddr_task
     except Exception as e:
         dut._log.warning(f"DDR spot-check error: {e}")
 
@@ -897,7 +895,7 @@ async def lane_mode_sweep_test(dut):
 
     # 1-lane
     payload = [i & 0xFF for i in range(16)]
-    exp = await drv.send_packet(0x2A, 0, payload, stall_cycles=set(), num_lanes=1)
+    await drv.send_packet(0x2A, 0, payload, stall_cycles=set(), num_lanes=1)
     coverage["lane_mode"]["1"] += 1
 
     await drv.exit_hs()
@@ -919,7 +917,8 @@ async def lane_mode_sweep_test(dut):
 async def short_sync_matrix_test(dut):
     cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
     drv, mon, _ = await tb_init(dut, lane_mode=2)
-    await drv.enter_hs(); await wait_ready(dut)
+    await drv.enter_hs(); 
+    await wait_ready(dut)
     for vc in range(4):
         for dt in [0x00, 0x01, 0x02, 0x03]:
             await drv.send_short_packet(dt, vc, 0, set(), num_lanes=2)
@@ -1059,7 +1058,8 @@ async def negative_crc_payload(dut):
     dut.lane0_valid.value = 0
     await RisingEdge(dut.clk)
 
-    await drv.exit_hs(); await Timer(50, unit="ns")
+    await drv.exit_hs(); 
+    await Timer(50, unit="ns")
 
     # If you have a DUT crc_err flag, assert it here
     # assert int(dut.crc_err.value) == 1
