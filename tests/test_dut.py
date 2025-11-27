@@ -224,7 +224,7 @@ async def tb_init(dut, lane_mode=2, start_mon=True):
     drv = Csi2Driver(dut)
     mon = Csi2Monitor(dut)
     mon.expected_num_lanes = lane_mode
-    _scb = Csi2Scoreboard()
+    scb = Csi2Scoreboard()
 
     # Start monitor
     if start_mon:
@@ -548,7 +548,7 @@ async def lane_skew_test(dut):
     drv = Csi2Driver(dut)
     mon = Csi2Monitor(dut)
     mon.expected_num_lanes = 2
-    _scb= Csi2Scoreboard()
+    scb= Csi2Scoreboard()
 
     cocotb.start_soon(mon.start())
 
@@ -1086,7 +1086,7 @@ async def class_based_multi_packet_test(dut):
 
     drv = Csi2Driver(dut)
     mon = Csi2Monitor(dut)
-    _scb = Csi2Scoreboard()
+    scb = Csi2Scoreboard()
     cocotb.start_soon(mon.start())
 
     # optional timing helper
