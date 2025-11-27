@@ -57,7 +57,7 @@ for dt in [0x2A, 0x2B, 0x2C]:
 def bin_payload_len(n):
     if n == 0:
         return "0"
-    if n == 1
+    if n == 1:
         return "1"
     if 2 <= n <= 7:
         return "2-7"
@@ -224,7 +224,7 @@ async def tb_init(dut, lane_mode=2, start_mon=True):
     drv = Csi2Driver(dut)
     mon = Csi2Monitor(dut)
     mon.expected_num_lanes = lane_mode
-    scb = Csi2Scoreboard()
+    _scb = Csi2Scoreboard()
 
     # Start monitor
     if start_mon:
@@ -263,7 +263,7 @@ class Csi2Driver:
 
         # Lane distribute
         lanes = lane_distribute(expected_bytes, num_lanes)
-        max_len = max(len(lane) for l in lanes)
+        max_len = max(len(line) for line in lanes)
 
         idx = 0
         cycle = 0
@@ -329,7 +329,7 @@ class Csi2Driver:
     async def send_short_packet(self, datatype, vc, short_data, stall_cycles, num_lanes=2):
         pkt = build_short_packet(datatype, vc, short_data)
         lanes = lane_distribute(pkt, num_lanes)
-        max_len = max(len(lane) for l in lanes)
+        max_len = max(len(line) for line in lanes)
 
         idx = 0
         cycle = 0
@@ -548,7 +548,7 @@ async def lane_skew_test(dut):
     drv = Csi2Driver(dut)
     mon = Csi2Monitor(dut)
     mon.expected_num_lanes = 2
-    scb= Csi2Scoreboard()
+    _scb= Csi2Scoreboard()
 
     cocotb.start_soon(mon.start())
 
@@ -1046,7 +1046,8 @@ async def negative_crc_payload(dut):
         do_write = ready and v0
         if do_write:
             if idx == 0: dut.sop.value = 1
-            if idx == (len(lanes[0]) - 1): dut.eop.value = 1
+            if idx == (len(lanes[0]) - 1):
+                dut.eop.value = 1
             dut.txwrite_hs.value = 1
         await RisingEdge(dut.clk)
         if do_write:
@@ -1085,7 +1086,7 @@ async def class_based_multi_packet_test(dut):
 
     drv = Csi2Driver(dut)
     mon = Csi2Monitor(dut)
-    scb = Csi2Scoreboard()
+    _scb = Csi2Scoreboard()
     cocotb.start_soon(mon.start())
 
     # optional timing helper
