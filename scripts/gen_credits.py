@@ -1,4 +1,7 @@
-"""Script to generate the project's credits."""
+"""
+Script to generate the project's credits.
+This file should be executed by the mkdocs-gen-files plugin.
+"""
 
 from __future__ import annotations
 
@@ -11,15 +14,21 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Mapping, cast
 
+# mkdocs-gen-files hook
+from mkdocs_gen_files import set_content, Nav
+
 from jinja2 import StrictUndefined
 from jinja2.sandbox import SandboxedEnvironment
 
+# --- Compatibility for TOML parsing ---
 # TODO: Remove once support for Python 3.10 is dropped.
 if sys.version_info >= (3, 11):
     import tomllib
 else:
     import tomli as tomllib
+# --------------------------------------
 
+# 1. Load project data
 project_dir = Path(os.getenv("MKDOCS_CONFIG_DIR", "."))
 with project_dir.joinpath("pyproject.toml").open("rb") as pyproject_file:
     pyproject = tomllib.load(pyproject_file)
@@ -33,6 +42,7 @@ regex = re.compile(r"(?P<dist>[\w.-]+)(?P<spec>.*)$")
 
 
 def _get_license(pkg_name: str) -> str:
+    """Get the license of a package."""
     try:
         data = metadata(pkg_name)
     except PackageNotFoundError:
@@ -47,7 +57,9 @@ def _get_license(pkg_name: str) -> str:
 
 
 def _get_deps(base_deps: Mapping[str, Mapping[str, str]]) -> dict[str, dict[str, str]]:
+    """Get a list of dependencies based on lock data."""
     deps = {}
+    # ... (rest of _get_deps function logic, unchanged)
     for dep in base_deps:
         parsed = regex.match(dep).groupdict()  # type: ignore[union-attr]
         dep_name = parsed["dist"].lower()
@@ -83,6 +95,8 @@ def _get_deps(base_deps: Mapping[str, Mapping[str, str]]) -> dict[str, dict[str,
 
 
 def _render_credits() -> str:
+    """Render the credits page."""
+    # ... (rest of _render_credits function logic, unchanged)
     dev_dependencies = _get_deps(chain(*pdm.get("dev-dependencies", {}).values()))  # type: ignore[arg-type]
     prod_dependencies = _get_deps(
         chain(  # type: ignore[arg-type]
@@ -139,5 +153,13 @@ def _render_credits() -> str:
     jinja_env = SandboxedEnvironment(undefined=StrictUndefined)
     return jinja_env.from_string(template_text).render(**template_data)
 
+# 2. Set the content for credits.md
+credits_content = _render_credits()
+set_content("credits.md", credits_content)
 
-print(_render_credits())
+# 3. Add credits.md to the navigation structure (if not using literate-nav for this file)
+# The Nav object is also from mkdocs-gen-files
+nav = Nav()
+nav["Home"]["Credits"] = "credits.md"
+
+# This should be enough to ensure a clean file is processed by MkDocs.
