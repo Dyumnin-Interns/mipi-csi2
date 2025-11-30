@@ -59,7 +59,7 @@ def _get_license(pkg_name: str) -> str:
 def _get_deps(base_deps: Mapping[str, Mapping[str, str]]) -> dict[str, dict[str, str]]:
     """Get a list of dependencies based on lock data."""
     deps = {}
-    # ... (rest of _get_deps function logic, unchanged)
+    # Get direct dependencies
     for dep in base_deps:
         parsed = regex.match(dep).groupdict()  # type: ignore[union-attr]
         dep_name = parsed["dist"].lower()
@@ -71,6 +71,7 @@ def _get_deps(base_deps: Mapping[str, Mapping[str, str]]) -> dict[str, dict[str,
             **lock_pkgs[dep_name],
         }
 
+    # Get transitive dependencies
     again = True
     while again:
         again = False
@@ -96,8 +97,10 @@ def _get_deps(base_deps: Mapping[str, Mapping[str, str]]) -> dict[str, dict[str,
 
 def _render_credits() -> str:
     """Render the credits page."""
-    # ... (rest of _render_credits function logic, unchanged)
+    # Note: `pdm.get("dev-dependencies", {})` returns a dict of groups, need to chain values
     dev_dependencies = _get_deps(chain(*pdm.get("dev-dependencies", {}).values()))  # type: ignore[arg-type]
+    
+    # Note: `project.get("optional-dependencies", {})` returns a dict of groups, need to chain values
     prod_dependencies = _get_deps(
         chain(  # type: ignore[arg-type]
             project.get("dependencies", []),
@@ -124,7 +127,7 @@ def _render_credits() -> str:
         These projects were used to build *{{ project_name }}*. **Thank you!**
 
         [`python`](https://www.python.org/) |
-        [pdm](https://pdm.fming.dev/) |
+        [`pdm`](https://pdm.fming.dev/) |
         [`copier-pdm`](https://github.com/pawamoy/copier-pdm)
 
         {% macro dep_line(dep) -%}
